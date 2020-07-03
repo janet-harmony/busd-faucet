@@ -32,19 +32,19 @@
 </template>
 
 <script>
-  require('dotenv').config({path: '/Users/janetliang/WebstormProjects/busd-faucet/faucet/.env'})
   const { Harmony } = require('@harmony-js/core')
   const { ChainType } = require('@harmony-js/utils')
 
-  const hmy = new Harmony(process.env.ENDPOINT,
+  let endpoint = 'https://api.s0.b.hmny.io'
+  let chainid = 2
+
+  const hmy = new Harmony(endpoint,
           {
             chainType: ChainType.Harmony,
-            chainID: process.env.CHAINID,
+            chainID: chainid,
           }
   )
-
-  console.log(process.env)
-  console.log(hmy)
+  
   export default {
     name: 'App',
     data: () => ({
