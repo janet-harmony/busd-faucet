@@ -53,7 +53,7 @@
   export default {
     name: 'App',
     data: () => ({
-      amount: 1, // How much is a good amount to send out, change when done testing
+      amount: 100,
       toAddress: "",
       required: value => !!value || 'Required.',
       loading: false,
