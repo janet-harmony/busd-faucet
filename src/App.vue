@@ -18,6 +18,7 @@
                       filled
                       rounded
                       dense
+                      :rules="[required]"
                       label="ONE Address"
                       append-outer-icon="mdi-arrow-right-bold"
                       @click:append-outer="sendTransaction"
@@ -54,6 +55,7 @@
     data: () => ({
       amount: 1, // How much is a good amount to send out, change when done testing
       toAddress: "",
+      required: value => !!value || 'Required.',
       loading: false,
       successful: true,
       hash: null,
@@ -61,31 +63,40 @@
     }),
     methods: {
       async sendTransaction() {
-        console.log("sending transaction for " + this.amount + " to " + this.toAddress)
+        if (this.toAddress == "") {
+          return
+        }
         let requestString = 'http://localhost:3000/tx?method=transfer&args=' + this.toAddress + ',' + (this.amount * 1e18)
-        console.log(requestString)
         this.loading = true
         this.hash = null
         this.link = null
 
-        fetch(requestString, { mode: 'cors', headers: {
-            'Content-Type': 'application/json',
-          }})
-                .then(response => {
-                  this.loading = false
-                  if (!response.ok) {
-                    this.successful = false
-                    throw new Error('Network response was not ok');
-                  }
-                  this.successful = true
-                  response.json().then(resp => {
-                    this.hash = resp.hash
-                    this.link = 'https://explorer.testnet.harmony.one/#/tx/' + resp.hash
-                  })
-                })
-                .catch(error => {
-                  console.error('Error:', error);
-                })
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        const fetchPromise = fetch(requestString, { signal, mode: 'cors', headers: {'Content-Type': 'application/json',}})
+
+        const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+
+        fetchPromise.then(response => {
+          this.loading = false
+          if (!response.ok) {
+            this.successful = false
+            throw new Error('Network response was not ok');
+          }
+          this.successful = true
+          response.json().then(resp => {
+            this.hash = resp.hash
+            this.link = 'https://explorer.testnet.harmony.one/#/tx/' + resp.hash
+          })
+        })
+        .catch(error => {
+          this.loading = false
+          this.successful = false
+          console.error('Error:', error);
+        })
+
+        clearTimeout(timeoutId)
       },
     }
   };
