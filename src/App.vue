@@ -87,7 +87,7 @@
           this.successful = true
           response.json().then(resp => {
             this.hash = resp.hash
-            this.link = 'https://explorer.testnet.harmony.one/#/tx/' + resp.hash
+            this.link = 'http://hrc20.easy-staking.com:8080/#/tx/' + resp.hash
           })
         })
         .catch(error => {
